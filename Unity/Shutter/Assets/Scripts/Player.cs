@@ -8,12 +8,17 @@ public class Player : MonoBehaviour {
 	private Transform headTrans;
 	private Vector3 moveDir;
 	private float headTilt = 0;
+	private int photoNum = 1;
+	private SnapshotManager snapMan;
 
 	[SerializeField] float walkSpeed = 0.2f;
 	[SerializeField] float mouseXSens = 2f;
 	[SerializeField] float mouseYSens = 2f;
 	[SerializeField,Range(-90,0)] float headDownTilt;
 	[SerializeField,Range(0,90)] float headUpTilt;
+	[SerializeField] string pictureName;
+	[SerializeField] Texture[] capturedImages;
+
 
 	void Start () 
 	{
@@ -29,6 +34,8 @@ public class Player : MonoBehaviour {
 		playerChar = GetComponent<CharacterController>();
 		cam = Camera.main;
 		headTrans = cam.transform.parent.GetComponentInParent<Transform> ();
+		snapMan = FindObjectOfType<SnapshotManager> ();
+		snapMan.LoadSnap (photoNum);
 
 	}
 
@@ -55,7 +62,11 @@ public class Player : MonoBehaviour {
 
 		}
 
-		if (Input.Get)
+		if (Input.GetButtonDown ("Fire1")) 
+		{
+			TakePhoto ();
+		}
+
 
 	}
 
@@ -64,6 +75,17 @@ public class Player : MonoBehaviour {
 		moveDir = transform.TransformDirection (moveDir);
 		moveDir *= walkSpeed;
 		playerChar.Move (moveDir);
+
+	}
+
+	void TakePhoto ()
+	{
+		//Texture photo = new Texture;
+		//photo.name
+		string photo = pictureName + 00 + photoNum+".png" as string;
+		Application.CaptureScreenshot (photo);
+		photoNum++;
+		snapMan.LoadSnap (photoNum);
 
 	}
 }
