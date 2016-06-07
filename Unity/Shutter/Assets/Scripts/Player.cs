@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.IO;
 
 public class Player : MonoBehaviour {
 
@@ -8,8 +9,9 @@ public class Player : MonoBehaviour {
 	private Transform headTrans;
 	private Vector3 moveDir;
 	private float headTilt = 0;
-	private int photoNum = 1;
+	private int photoNum = 0;
 	private SnapshotManager snapMan;
+
 
 	[SerializeField] float walkSpeed = 0.2f;
 	[SerializeField] float mouseXSens = 2f;
@@ -17,7 +19,7 @@ public class Player : MonoBehaviour {
 	[SerializeField,Range(-90,0)] float headDownTilt;
 	[SerializeField,Range(0,90)] float headUpTilt;
 	[SerializeField] string pictureName;
-	[SerializeField] Texture[] capturedImages;
+	[SerializeField] Texture2D[] capturedImages;
 
 
 	void Start () 
@@ -35,7 +37,8 @@ public class Player : MonoBehaviour {
 		cam = Camera.main;
 		headTrans = cam.transform.parent.GetComponentInParent<Transform> ();
 		snapMan = FindObjectOfType<SnapshotManager> ();
-		snapMan.LoadSnap (photoNum);
+		//snapMan.LoadSnap (photoNum);
+		StartCoroutine(NextSnap());
 
 	}
 
@@ -80,12 +83,48 @@ public class Player : MonoBehaviour {
 
 	void TakePhoto ()
 	{
+		photoNum++;
 		//Texture photo = new Texture;
 		//photo.name
-		string photo = pictureName + 00 + photoNum+".png" as string;
+		string photo = Application.persistentDataPath+ "//" + pictureName + 00 + photoNum + ".png" as string;
 		Application.CaptureScreenshot (photo);
-		photoNum++;
-		snapMan.LoadSnap (photoNum);
+
+
+		/*int width = Screen.width;
+		int height = Screen.height;
+
+			Texture2D tex = new Texture2D (width, height, TextureFormat.RGB24, false);
+
+			tex.ReadPixels (new Rect (0, 0, width, height), 0, 0);
+			tex.Apply ();
+			
+			byte[] bytes = tex.EncodeToPNG ();
+			Destroy (tex);
+
+		File.WriteAllBytes (Application.persistentDataPath+ "//" + pictureName + 00 + photoNum + ".png", bytes);*/
+
+		//TODO: Display picture on screen before showing live scene again
+		//		Add Shutter effect
+		StartCoroutine(NextSnap());
+
 
 	}
+
+	IEnumerator NextSnap ()
+	{
+		for (float t = 0.2f; t >= 0f; t -= 0.1f) 
+		{
+			if (t == 0f) 
+			{
+				snapMan.snapShots [photoNum].ActivateSnap ();
+				if (photoNum > 0) {
+					snapMan.snapShots [photoNum - 1].DeactivateSnap ();
+				}
+			}
+
+				yield return new WaitForSeconds (0.2f);
+		}
+	}
+		
+		
 }
